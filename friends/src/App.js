@@ -1,28 +1,39 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import { connect } from 'react-redux';
+import {
+  loginRequest, loginSuccess, loginFailure, addFriend, fetchFriends,
+} from './actions';
+import FriendForm from './components/FriendForm';
+import FriendsList from './components/FriendsList';
+import Login from './components/Login';
 import './App.css';
 
-class App extends Component {
-  render() {
+const App = (props) => {
+  if (props.state.authToken) {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <FriendForm addFriend={props.addFriend} fetchFriends={props.fetchFriends} />
+        <FriendsList />
       </div>
     );
   }
-}
+  return (
+    <div className="App">
+      <Login
+        loginFailure={props.loginFailure}
+        loginRequest={props.loginRequest}
+        loginSuccess={props.loginSuccess}
+      />
+    </div>
+  );
+};
 
-export default App;
+const mapStateToProps = state => ({
+  state: {
+    authToken: state.authToken,
+  },
+});
+
+export default connect(mapStateToProps, {
+  loginRequest, loginSuccess, loginFailure, addFriend, fetchFriends,
+})(App);
