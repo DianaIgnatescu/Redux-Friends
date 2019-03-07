@@ -4,7 +4,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Friend from './Friend';
 // import FriendEditable from './FriendEditable';
-import { fetchFriends } from '../actions';
+import { fetchFriends, deleteFriend } from '../actions';
 
 class FriendsList extends React.Component {
   constructor(props) {
@@ -17,36 +17,20 @@ class FriendsList extends React.Component {
 
   render() {
     const {
-      friends, updateFriend, handleUpdateChange, makeUneditable, makeEditable, deleteFriend,
+      friends, updateFriend, handleUpdateChange, makeUneditable, makeEditable, deleteFriend, fetchFriends,
     } = this.props;
     return (
       <div className="friends-list-container">
         <h2>List of Friends</h2>
-        {friends.map(friend =>
-          // if (friend.isEditable) {
-          //   return (
-          //     <FriendEditable
-          //       key={friend.id}
-          //       name={friend.name}
-          //       age={friend.age}
-          //       id={friend.id}
-          //       email={friend.email}
-          //       updateFriend={updateFriend}
-          //       handleUpdateChange={handleUpdateChange}
-          //       makeUneditable={makeUneditable}
-          //     />);
-          // }
-          (
-            <Friend
-              name={friend.name}
-              age={friend.age}
-              id={`${friend.id}-${friend.email}`}
-              key={friend.id}
-              email={friend.email}
-              deleteFriend={this.props.deleteFriend}
-            // makeEditable={makeEditable}
-            />
-          ))}
+        {friends.map(friend => <Friend
+          name={friend.name}
+          age={friend.age}
+          id={friend.id}
+          key={`${friend.id}-${friend.email}`}
+          email={friend.email}
+          deleteFriend={deleteFriend}
+          fetchFriends={fetchFriends}
+        />)}
       </div>
 
     );
@@ -62,5 +46,6 @@ export default connect(
   mapStateToProps,
   {
     fetchFriends,
+    deleteFriend,
   },
 )(FriendsList);
