@@ -10,6 +10,7 @@ import friendUpdated from './friendUpdated';
 import deletingFriend from './deletingFriend';
 import friendDeleted from './friendDeleted';
 import error from './error';
+import authToken from './authToken';
 
 export default combineReducers({
   friends,
@@ -22,4 +23,5 @@ export default combineReducers({
   deletingFriend,
   friendDeleted,
   error,
+  authToken,
 });
