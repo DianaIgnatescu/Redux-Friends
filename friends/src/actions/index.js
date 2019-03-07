@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 
-
 export const FETCH_FRIENDS = 'FETCH_FRIENDS';
 export const FETCH_FRIENDS_SUCCESS = 'FETCH_FRIENDS_SUCCESS';
 export const FETCH_FRIENDS_FAILURE = 'FETCH_FRIENDS_FAILURE';
@@ -22,6 +21,19 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const LOGIN_FAILURE = 'LOGIN_FAILURE';
 
 // Synchronous action creators
+
+export const loginSuccess = token => ({
+  type: LOGIN_SUCCESS,
+  payload: { token },
+});
+
+export const loginFailure = error => ({
+  type: LOGIN_FAILURE,
+  payload: {
+    error,
+  },
+});
+
 export const fetchFriendsSuccess = (friends) => {
   if (!friends) {
     throw new Error('fetchFriendsSuccess requires a friends result');
@@ -125,27 +137,64 @@ export const saveFriendFailure = (error) => {
 };
 
 // Asynchronous action creators
-const TOKEN = 'eyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NjYwYmQifQ';
-export const fetchFriends = () => async (dispatch) => {
-  dispatch({ type: FETCH_FRIENDS });
+// const TOKEN = 'esfeyJ1c2VySWQiOiJiMDhmODZhZi0zNWRhLTQ4ZjItOGZhYi1jZWYzOTA0NUIhkufemQifQ';
+const TOKEN = '';
+
+export const loginRequest = (username, password) => async (dispatch) => {
+  dispatch({ type: LOGIN_REQUEST });
   const config = {
+    method: 'POST',
     headers: {
-      authorization: TOKEN,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
+  };
+  try {
+    const result = await fetch('http://localhost:5000/api/login', config);
+    const jsonResult = await result.json();
+    if (result.status === 403) {
+      throw new Error(jsonResult.error);
+    }
+    dispatch(loginSuccess(jsonResult.payload));
+  } catch (error) {
+    dispatch(loginFailure(error.message));
+  }
+};
+
+export const fetchFriends = () => async (dispatch, getState) => {
+  dispatch({ type: FETCH_FRIENDS });
+  const token = getState().authToken;
+  const config = {
+    method: 'GET',
+    headers: {
+      authorization: token,
     },
   };
   try {
-    const result = await axios.get('http://localhost:5000/api/friends', config);
-    dispatch(fetchFriendsSuccess(result.data));
+    const result = await fetch('http://localhost:5000/api/friends', config);
+    const jsonResult = await result.json();
+    dispatch(fetchFriendsSuccess(jsonResult));
   } catch (error) {
     dispatch(fetchFriendsFailure(error.message));
   }
 };
 
-export const addFriend = () => async (dispatch) => {
+export const addFriend = (name, age, email) => async (dispatch, getState) => {
   dispatch({ type: ADD_FRIEND });
+  const token = getState().authToken;
+  const friend = { name, age, email };
+  const config = {
+    method: 'POST',
+    headers: {
+      authorization: token,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(friend),
+  };
   try {
-    const result = await axios.post('http://localhost:5000/api/friends');
-    dispatch(addFriendSuccess(result));
+    const result = await fetch('http://localhost:5000/api/friends', config);
+    const jsonResult = await result.json();
+    dispatch(addFriendSuccess(jsonResult));
   } catch (error) {
     dispatch(addFriendFailure(error.message));
   }
@@ -161,11 +210,20 @@ export const updateFriend = id => async (dispatch) => {
   }
 };
 
-export const deleteFriend = id => async (dispatch) => {
+export const deleteFriend = id => async (dispatch, getState) => {
   dispatch({ type: DELETE_FRIEND });
+  const token = getState().authToken;
+  const config = {
+    method: 'DELETE',
+    headers: {
+      authorization: token,
+      'Content-Type': 'application/json',
+    },
+  };
   try {
-    const result = await axios.delete(`http://localhost:5000/api/friends/${id}`);
-    dispatch(deleteFriendSuccess(result));
+    const result = await fetch(`http://localhost:5000/api/friends/${id}`, config);
+    const jsonResult = await result.json();
+    dispatch(deleteFriendSuccess(jsonResult));
   } catch (error) {
     dispatch(deleteFriendFailure(error.message));
   }
